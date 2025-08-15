@@ -13,27 +13,67 @@ def Write_pixel(x, y, color=(1.0, 0.0, 0.0)):
 
 # Algoritmo do ponto médio
 def midPoint(x1, y1, x2, y2, color=(1.0, 0.0, 0.0)):
+    # Inclinação da reta
     dx = x2 - x1
     dy = y2 - y1
-    d = 2 * dy - dx  # valor inicial de d
-    incE = 2 * dy  # incremento para E
-    incNE = 2 * (dy - dx)  # incremento para NE
 
-    x = x1
-    y = y1
-    Write_pixel(x, y, color)
+    # Direções de incremento (sinal)
+    sx = 1 if dx >= 0 else -1
+    sy = 1 if dy >= 0 else -1
 
-    while x < x2:
-        if d <= 0:
-            # Escolhe E
-            d += incE
-            x += 1
-        else:
-            # Escolhe NE
-            d += incNE
-            x += 1
-            y += 1
+    # Caso linha vertical (x constante)
+    if dx == 0:
+        y = y1
+        Write_pixel(x1, y, color)
+        for _ in range(dy):
+            y += sy
+            Write_pixel(x1, y, color)
+        return
+
+    # Caso linha horizontal (y constante)
+    if dy == 0:
+        x = x1
+        Write_pixel(x, y1, color)
+        for _ in range(dx):
+            x += sx
+            Write_pixel(x, y1, color)
+        return
+
+    # Caso geral: decidir eixo de iteração
+    if dx >= dy:
+        # Iteração ao longo de X (|m| <= 1)
+        d = 2 * dy - dx  # decisão inicial
+        incE = 2 * dy  # escolher "E"
+        incNE = 2 * (dy - dx)  # escolher "NE" (ou "SE" dependendo do sy)
+        x, y = x1, y1
         Write_pixel(x, y, color)
+        for i in range(dx):
+            if d <= 0:
+                # segue no eixo principal (E)
+                d += incE
+            else:
+                # anda um em Y (NE/SE)
+                y += sy
+                d += incNE
+            x += sx
+            Write_pixel(x, y, color)
+    else:
+        # Iteração ao longo de Y (|m| > 1)
+        d = 2 * dx - dy  # decisão inicial
+        incE = 2 * dx  # escolher "E" no espaço transposto
+        incNE = 2 * (dx - dy)  # escolher "NE/SE" no espaço transposto
+        x, y = x1, y1
+        Write_pixel(x, y, color)
+        for i in range(dy):
+            if d <= 0:
+                # segue no eixo principal (E "transposto")
+                d += incE
+            else:
+                # anda um em X
+                x += sx
+                d += incNE
+            y += sy
+            Write_pixel(x, y, color)
 
 # Desenha eixos X e Y com marcações
 def draw_axes():
@@ -64,7 +104,7 @@ def display():
     draw_axes()
 
     # Exemplo: linha de (-100, -50) até (150, 120)
-    midPoint(-100, -50, 100, 0, (1.0, 0.0, 0.0))
+    midPoint(-0, -0, 100, 100, (1.0, 0.0, 0.0))
 
     glFlush()
 
